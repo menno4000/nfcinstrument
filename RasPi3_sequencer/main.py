@@ -1,7 +1,8 @@
 import time
 import pygame
+from queue import Queue
 
-#import receiver
+import receiver
 import sequencer
 
 # todo's:
@@ -16,8 +17,14 @@ sound_files = ['./sounds/Aubit_Kick5.wav', './sounds/Aubit_Snare3.wav', './sound
 
 if __name__ == "__main__":
     print("INFO - Starting Script to receive sounds from Arduino via Bluetooth and run Sequencer to make music.")
-    #bluetooth_input = receiver.ReceiveInput()
-    sequencer_loop = sequencer.Sequencer(sound_files)
+
+    # queue is used to send signals from one thread to another
+    queue = Queue()
+
+    # initialize threads for receiving signals via bluetooth & starting sequencer which plays sounds
+    bluetooth_input = receiver.ReceiveInput(queue)
+    sequencer_loop = sequencer.Sequencer(sound_files, queue)
     while True:
         print("INFO - Script is still running...")
         time.sleep(5)
+

@@ -16,9 +16,7 @@ def print_sequencer(sequencer):
         return
     with canvas(device) as draw:
         for y in range(len(sequencer)):
-            if y < 3:
-                print(sequencer[y])
-                for x in range(len(sequencer[y])):
-                    if sequencer[y][x] == 1:
-                        point = x, y
-                        draw.point(point, fill="white")
+            for x in range(len(sequencer[y])):
+                if sequencer[y][x] == 1:
+                    point = x, y
+                    draw.point(point, fill="white")

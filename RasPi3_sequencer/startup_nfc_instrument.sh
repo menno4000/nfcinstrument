@@ -31,4 +31,4 @@ sleep 5
 
 echo "starting sequencer script with python"
 # start python script
-python main.py
+python3 main.py
