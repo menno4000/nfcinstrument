@@ -3,12 +3,19 @@ import time
 import numpy
 import pygame
 
+import displayer
+
+
+# methods for sequencer:
+# start/stop
+# reset sequence
+# give start presets: constant kick, kick pattern etc.
 
 def get_channels_and_sounds(list_of_sounds):
     pygame.mixer.init(frequency=44100, size=-16, channels=1, buffer=2 ** 12)
 
     amount_of_sounds = len(list_of_sounds)
-    print(f"INFO - Setting up {amount_of_sounds} channels and loading wav-files into sound objects.")
+    print("INFO - Setting up '%s' channels and loading wav-files into sound objects." % amount_of_sounds)
     channels = [0] * 16
     sounds = [0] * 16
     for i in range(amount_of_sounds):
@@ -21,23 +28,26 @@ def get_channels_and_sounds(list_of_sounds):
     return channels, sounds
 
 
-def get_sequencer(sequence_length):
-    sequencer = numpy.zeros(shape=(4, sequence_length), dtype='int8')
+def get_sequencer(sequence_length, amount_of_sounds):
+    sequencer = numpy.zeros(shape=(amount_of_sounds, sequence_length), dtype='int8')
 
     print("INFO - Loading example Sequencer Layout")
     # 1 1 1 1 | 1 1 1 1 | 1 1 1 1 | 1 1 1 1 | - kick drum,  sequencer[0]
     # 0 1 0 1 | 0 1 0 1 | 0 1 0 1 | 0 1 0 1 | - clap,       sequencer[1]
     for i in range(sequence_length):
-        if (i % 4) == 0:
+        if i % 4 == 0:    # kick
             sequencer[0][i] = 1
-        if (i+4)%8 == 0:
+        if (i+4)%8 == 0:    # snare
             sequencer[1][i] = 1
+        if (i+2) % 4 == 0:    # hihat
+            sequencer[2][i] = 1
 
-    sequencer[2] = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0]
+    #sequencer[2] = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0,   0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0]
     # sequencer[3] = [0,1,1,1, 0,1,1,1, 0,1,1,1, 0,1,1,1,   0,1,1,1, 0,1,1,1, 0,1,1,1, 0,1,1,1,   0,1,1,1, 0,1,1,1, 0,1,1,1, 0,1,1,1,   0,1,1,1, 0,1,1,1, 0,1,1,1, 0,1,1,1]
     #sequencer[3] = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, ]
 
     show_sequencer_layout(sequencer)
+    displayer.print_sequencer(sequencer)
     return sequencer
 
 
@@ -46,10 +56,10 @@ def show_sequencer_layout(sequencer):
     print("------------------------------------------------------------------------------------------------")
 
     print("Bar -\t\t 1_______2_______3_______4_______5_______6_______7_______8_______")
-    print(f"KICK -\t\t{sequencer[0][32:]} ...")
-    print(f"SNARE -\t\t{sequencer[1][32:]} ...")
-    print(f"HIHAT -\t\t{sequencer[2][32:]} ...")
-    print(f"BASS -\t\t{sequencer[3][32:]} ...")
+    print("KICK -\t\t%s ..." % sequencer[0])
+    print("SNARE -\t\t%s ..." % sequencer[1])
+    print("HIHAT -\t\t%s ..." % sequencer[2])
+    print("BASS -\t\t%s ..." % sequencer[3])
     print("Beat - \t\t 1 2 3 4 5 6 7 8 9 10  12  14  16  18  20  22  24  26  28  30  32")
     print("Beat - \t\t                     11  13  15  17  19  21  23  25  27  29  31")
     print("------------------------------------------------------------------------------------------------")
@@ -59,12 +69,13 @@ class Sequencer(object):
 
     def __init__(self, list_of_sounds):
         self.delay_factor = 0.8
-        self.bpm = 145
-        self.ibb = 60 / self.bpm / 4  # interval between beats
-        self.sequence_length = 64  # 4 bars, 16th notes, 4 are one beat
+        self.bpm = 120.0
+        self.ibb = (60.0 / 120.0) / 4.0  # interval between beats
+        print(self.ibb)
+        self.sequence_length = 32  # 4 bars, 8th notes, 8 are one beat
 
         self.channels, self.sounds = get_channels_and_sounds(list_of_sounds)
-        self.seq = get_sequencer(self.sequence_length)
+        self.seq = get_sequencer(self.sequence_length, len(self.channels))
 
         thread = threading.Thread(target=self.run, args=())
         thread.daemon = True

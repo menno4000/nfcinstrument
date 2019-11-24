@@ -5,10 +5,10 @@ import pygame
 import sequencer
 
 # todo's:
-# log outputs
-# two classes, one main file
 # two sequencer modes: running and paused
-# use led matrix to show saved notes
+# insert sound from BT into sequence
+# use led matrix to show saved notes: open thread for display
+
 
 # this list contains playable sound files (please keep in order)
 # 1-kick, 2-snare (or clap), 3-hihat, 4-bass,
