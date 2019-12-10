@@ -18,21 +18,21 @@ class ReceiveInput(object):
     def run(self, queue):
 
         # example signal mocking: add kick roll
-        time.sleep(7.8)
-        print("BT_INFO - adding kick roll_part1")
-        queue.put("0")
+        #time.sleep(7.8)
+        #print("BT_INFO - adding kick roll_part1")
+        #queue.put("0")
+#
+        #time.sleep(7.8)
+        #print("BT_INFO - adding kick roll_part2")
+        #queue.put("0")
+        #time.sleep(0.25)
+        #queue.put("0")
 
-        time.sleep(7.8)
-        print("BT_INFO - adding kick roll_part2")
-        queue.put("0")
-        time.sleep(0.25)
-        queue.put("0")
-
-        
-        #while True:
+        while True:
             #data = bluetoothSerial.read(size=5)
             #if data:
             #    print("BT_INFO - Received data: %s" % data)
-            #    queue.put(data)
+            #    queue.put("2")
+            print("hello")
 
 

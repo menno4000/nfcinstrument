@@ -16,27 +16,22 @@ It will show the programmed sequence and give additional information.
 
 Connect your pins from the MAX7219 Matrix to the raspberry according to the following images:
 
-'pictures'
+![Cable connection](RasPi3_sequencer/images/LEDMatrix_cable_connecting.png)
 
-install packages on RasPi:
+![Pin Layout](RasPi3_sequencer/images/raspi3-pin-layout.png)
+
+#### Install packages on RasPi:
 ```
 sudo apt-get update
 
 # get Bluetooth setup
 sudo apt-get install bluetooth bluez pi-bluetooth blueman
 
-# get python3 and pip3
-sudo apt-get install python3-dev libffi-dev libssl-dev -y.
-wget https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tar.xz.
-tar xJf Python-3.6.3.tar.xz.
-cd Python-3.6.3.
-./ configure.
-make.
-sudo make install.
-sudo pip3 install --upgrade pip.
+# install python3 and pip3
+...
 
-# install dependencies for LED_Matrix
-pip3 install luma.core luma.led_matrix
+# install python modules from file
+pip3 install -r RasPi3_sequencer/requirements.txt
 ```
 
 To establish a connection between the RasPi and Arduino (via Bluetooth module HC05) execute the following commands on RasPi:
