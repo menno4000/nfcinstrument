@@ -32,6 +32,11 @@ sudo apt-get install bluetooth bluez pi-bluetooth blueman
 
 # install python modules from file
 pip3 install -r RasPi3_sequencer/requirements.txt
+
+# open spi device port
+sudo nano /boot/config.txt
+# enable code line: 'dtparam=spi=on'
+# reboot
 ```
 
 To establish a connection between the RasPi and Arduino (via Bluetooth module HC05) execute the following commands on RasPi:
