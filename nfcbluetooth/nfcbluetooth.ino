@@ -75,7 +75,7 @@ void loop() // Hier beginnt der Loop-Teil
   mfrc522.PCD_StopCrypto1(); //RFID tag fuer neue kommunikation resetten
 }
 
-
+//helper methods from https://makecourse.weebly.com/uploads/2/4/7/9/24790373/rfid_tutorial_sketch.zip
 int readBlock(int blockNumber, byte arrayAddress[]) 
 {
   int largestModulo4Number=blockNumber/4*4;
