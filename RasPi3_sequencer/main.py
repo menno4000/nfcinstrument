@@ -1,5 +1,5 @@
-import time
 import sys
+import os
 from queue import Queue
 
 import receiver
@@ -26,9 +26,20 @@ if __name__ == "__main__":
     # initialize threads for receiving signals via bluetooth & starting sequencer which plays sounds
     #bluetooth_input = receiver.ReceiveInput(queue)
 
+    # setup sound files
+    rootdir = "./samples/"
+    sample_files = []
+    for subdir, dirs, files in os.walk(rootdir):
+        for directory in sorted(dirs):
+            current_samples = []
+            for file in os.listdir(rootdir + directory):
+                if file.endswith(".wav"):
+                    current_samples.append(rootdir + directory + "/" + file)
+            sample_files.append(current_samples)
+
     # examples:
     # sequencer_loop = sequencer.Sequencer(sound_files, queue, seq_length=32, bars=2, start_sequence=True)
-    sequencer_loop = sequencer.Sequencer(sound_files, queue, seq_length=64, bars=4, start_sequence=True)
+    sequencer_loop = sequencer.Sequencer(sample_files, queue, seq_length=64, bars=4, start_sequence=True)
     while True:
         print("INFO - Script is still running...")
 

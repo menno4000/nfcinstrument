@@ -58,6 +58,7 @@ def bass_layout(layout, seq_length):
         if layout == 1:
             return triple_b + triple_b
 
+
 def metronome(seq_length):
     metro_beat =    [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
     metro_bar =     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

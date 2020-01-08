@@ -29,10 +29,9 @@ class ReceiveInput(object):
         #queue.put("0")
 
         while True:
-            #data = bluetoothSerial.read(size=5)
-            #if data:
-            #    print("BT_INFO - Received data: %s" % data)
-            #    queue.put("2")
-            print("hello")
+            data = bluetoothSerial.read(size=5)
+            if data:
+                print("BT_INFO - Received data: %s" % data)
+                queue.put(data)
 
 
