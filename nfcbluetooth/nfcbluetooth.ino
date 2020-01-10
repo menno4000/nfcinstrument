@@ -6,6 +6,10 @@
 
 #define RST_PIN 9 // RST an Pin 9 
 
+#define BUTTON1_PIN 2 // Button 2 an Pin 3
+
+#define BUTTON2_PIN 3 // Button 2 an Pin 3
+
 #include <SoftwareSerial.h>
 
 SoftwareSerial hc_05(7, 8); // Bluetooth modul an Pins 7 und 8
@@ -18,6 +22,10 @@ MFRC522::MIFARE_Key key; // create a MIFARE_Key struct named 'key', which will h
 
 unsigned long time_now = 0;
 
+//state variablen fuer buttons
+int button1State = 0;
+int button2State = 0;
+
 void setup() // Beginn des Setups:
 {
 
@@ -28,16 +36,39 @@ void setup() // Beginn des Setups:
   mfrc522.PCD_Init(); // Initialisierung des RFID-Empfängers
 
   hc_05.begin(9600);
+
+  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+
 }
 
 int blocknr=1;  //nr of block on card we are trying to interact with
-byte blockcontent[16] = {"d2____________"};//an array with 16 bytes to be written into one of the 64 card blocks is defined
+byte blockcontent[16] = {"13____________"};//an array with 16 bytes to be written into one of the 64 card blocks is defined
 
 byte readbackblock[18]; // Buffer fuer auslesen von NFC tags
 
 void loop() // Hier beginnt der Loop-Teil
 {
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+  //read buttons
+
+  button1State = digitalRead(BUTTON1_PIN);
+
+  if (button1State == LOW){
+    Serial.println("recorded top button press, switching to next instrument");
+    hc_05.print("#++");
+      delay(500);
+
+    return;
+  }
+
+  button2State = digitalRead(BUTTON2_PIN);
+
+  if (button2State == LOW){
+    Serial.println("recorded bottom button press, switching to previous instrument");
+    hc_05.print("#--");
+      delay(500);
+ 
+    return;
+  }
 
 
   if ( ! mfrc522.PICC_IsNewCardPresent()) // Wenn keine Karte in Reichweite ist...
@@ -50,6 +81,7 @@ void loop() // Hier beginnt der Loop-Teil
   }
   Serial.println("card detected.");
 
+//  //dieser abschnitt schreibt die in blockcontent gegebene note auf den ersten block der RFID-karte
 //  Serial.println("write block 1");
 //  writeBlock(blocknr, blockcontent);
 
@@ -64,11 +96,13 @@ void loop() // Hier beginnt der Loop-Teil
   Serial.print("note: ");
   Serial.print(note);
 
-  String noteStubMessage = note + "0000";
+  String noteStubMessage = "%"+note;
   
-//  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+//  mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 
   hc_05.print(noteStubMessage);
+
+  delay(500);
 
   Serial.println(""); // Mit dieser Zeile wird auf dem Serial Monitor nur ein Zeilenumbruch gemacht.
 
