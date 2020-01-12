@@ -51,6 +51,14 @@ sudo bluetoothctl
     exit
 ```
 
-Use the following script to open serial port to receive bluetooth signals in python and start the sequencer:
+First edit this script and change the MAC address to your HC05 value.
+Then start the script to open the serial port, listen for bluetooth signals and start the sequencer:
 
 ```./RasPi3_sequencer/startup_nfc_instrument.sh```
+
+If you cant hear anything make sure you are using the right audiosource. With this command you can set your audio output in the RasPi:
+
+```
+# Value: 0 - auto, 1 - analoque (headphone jack), 2 - HDMI
+sudo amixer cset numid=3 <value>
+```

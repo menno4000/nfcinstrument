@@ -6,102 +6,93 @@ import pygame
 import enum
 from threading import Thread
 
-#import displayer
+import displayer
 import util
-
 
 # methods for sequencer:
 # start/stop
 # reset sequence
 # give start presets: constant kick, kick pattern etc.
 
+
 class Channels(enum.Enum):
     Kick = 0
     Snare = 1
     HiHat = 2
     Bass = 3
-    MetroBar = 4
-    MetroBeat = 5
+    #MetroBar = 4
+    #MetroBeat = 5
 
 
 def get_channels_and_sounds(list_of_sounds):
-    pygame.mixer.init(frequency=44100, size=-16, channels=8, buffer=2 ** 12)
-
-    print("SEQ_INFO - Setting up '%s' channels and loading wav-files into sound objects." % amount_of_sounds)
     sounds = []
-    amount_of_sounds = 13
-    for i in range(len(list_of_sounds)):
+    amount_of_channels = len(list_of_sounds)
+    amount_of_sounds = 12
+
+    pygame.mixer.init(frequency=44100, size=-16, channels=8, buffer=2 ** 12)
+    pygame.init()
+    pygame.mixer.set_num_channels(amount_of_channels)
+
+    print("SEQ_INFO - Setting up '%s' channels and loading wav-files into sound objects." % amount_of_channels)
+
+    for i in range(amount_of_channels):
         sound_channel_list = [0] * amount_of_sounds
         for j in range(amount_of_sounds):
             sound_channel_list[j] = pygame.mixer.Sound(list_of_sounds[i][j])
+            sound_channel_list[j].set_volume(0.7)
         sounds.append(sound_channel_list)
     channels = [pygame.mixer.Channel(i)] * len(sounds)
-
-    sounds[0].set_volume(1.0)
-    sounds[1].set_volume(0.5)
-    sounds[2].set_volume(0.2)
 
     return channels, sounds
 
 
-def get_sequencer(sequence_length, amount_of_sounds, init=[]):
-    sequencer = numpy.zeros(shape=(amount_of_sounds, sequence_length), dtype='int8')
+def get_sequencer(seq_length=64, amount_of_sounds=4, note_length=16):
+    sequencer = numpy.zeros(shape=(amount_of_sounds, seq_length), dtype='int8')
 
     print("SEQ_INFO - Loading example Sequencer Layout")
-    sequencer[0] = util.kick_layout(1, sequence_length)
-    sequencer[1] = util.snare_or_clap_layout(1, sequence_length)
-    sequencer[2] = util.hihat_layout(1, sequence_length)
-    #sequencer[3] = util.bass_layout(1, sequence_length)
+    sequencer[0] = util.kick_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2)
+    sequencer[1] = util.snare_or_clap_layout(seq_length=seq_length, layout=1, note_length=note_length, note=2)
+    sequencer[2] = util.hihat_layout(seq_length=seq_length, layout=1, note_length=note_length, note=8)
+    sequencer[3] = util.bass_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2, second_note=3)
 
-    show_sequencer_layout(sequencer)
-    displayer.print_sequencer(sequencer, sequence_length)
+    if seq_length == 32:
+        util.show_sequencer_layout(sequencer)
+    displayer.print_sequencer(sequencer, seq_length=seq_length, note_length=note_length)
     return sequencer
-
-
-def show_sequencer_layout(sequencer):
-    print("SEQ_INFO - Sequencer Layout")
-    print("------------------------------------------------------------------------------------------------")
-
-    print("Bar -\t\t 1_______2_______3_______4_______5_______6_______7_______8_______")
-    print("KICK -\t\t%s ..." % sequencer[0])
-    print("SNARE -\t\t%s ..." % sequencer[1])
-    print("HIHAT -\t\t%s ..." % sequencer[2])
-    print("BASS -\t\t%s ..." % sequencer[3])
-    print("Beat - \t\t 1 2 3 4 5 6 7 8 9 10  12  14  16  18  20  22  24  26  28  30  32")
-    print("Beat - \t\t                     11  13  15  17  19  21  23  25  27  29  31")
-    print("------------------------------------------------------------------------------------------------")
 
 
 class Sequencer(object):
 
-    def __init__(self, list_of_sounds, queue, seq_length=32, bars=2, start_sequence=True, metro=False):
+    def __init__(self, list_of_sounds, queue, seq_length=32, note_length=16, start_sequence=True, metro=False):
         self.play = start_sequence
 
         # sequencer
-        self.bars = bars
-        self.sequence_length = seq_length  # 2 bars, 16th notes, 4 are one beat
+        self.note_length = note_length
+        self.sequence_length = seq_length
+        self.bars = seq_length/note_length
         self.channels, self.sounds = get_channels_and_sounds(list_of_sounds)
-        self.seq = get_sequencer(self.sequence_length, len(self.channels))
-
+        self.seq = get_sequencer(seq_length=self.sequence_length, amount_of_sounds=len(self.channels), note_length=self.note_length)
+        print(self.seq)
         self.beat = 0
         self.beat_to_program = -1
         self.current_channel = 0 # start on kick channel
         self.max_channels = len(self.channels)
+        self.volume = 0.75
 
         # timing
-        self.delay_factor = 0.8
         self.bpm = 120.0
-        self.ibb = (60.0 / self.bpm) / 8.0  # interval between beats
+        # time between each note (interval between beats: ibb)
+        self.ibb = (60.0 / self.bpm) / (note_length/4)
         self.metro = metro
 
         # times the intervals between notes
         self.timerThread = threading.Event()
 
-        print("SEQ_INFO - Start listening thread to receive data.")
-        self.listening_thread = Thread(target=self.listen_for_bt_input, args=(queue,))
-        self.listening_thread.start()
+        print("SEQ_INFO - Start listening threads to receive bluetooth & hardware data.")
+        self.bt_thread = Thread(target=self.listen_for_bt_input, args=(queue,))
+        self.bt_thread.start()
 
-        #displayer.give_info(self.bars, self.sequence_length, len(self.channels), self.seq)
+        #displayer.give_info(self)
 
         print("SEQ_INFO - Start playing loaded values.")
         thread = threading.Thread(target=self.run)
@@ -109,43 +100,63 @@ class Sequencer(object):
         thread.start()
 
     def interpret_command(self, command):
-        if command == "play" or command == "pause":
+        if command == "play":
+            self.beat = 0
             self.play = not self.play
-            displayer.print_text(command, self.seq)
+            if self.play:
+                displayer.print_text("play", self.seq, self.note_length)
+            else:
+                displayer.print_text("pause", self.seq, self.note_length)
         elif command == "reset":
-            #self.seq = get_sequencer(self.sequence_length, len(self.channels))
             self.seq[self.current_channel] = numpy.zeros(shape=self.sequence_length, dtype='int8')
             self.beat = 0
-            displayer.print_text(command, self.seq)
+            displayer.print_text("reset channel      %s" % Channels(self.current_channel).name, self.seq, self.note_length)
         elif command == "show":
-            displayer.give_info(self.bars, self.sequence_length, len(self.channels), self.seq)
+            displayer.give_info(self)
         elif command == "metro":
             self.toggle_metronome()
-        elif not self.play:
-            try:
-                beat = int(command)
-                if 1 <= beat <= 32:
-                    self.beat_to_program = beat-1
-                    displayer.print_text("note %s" % beat, self.seq)
-            except ValueError:
-                print('Could not find interpretation for your command. Received command: %s' % command)
+        elif 'beat' in command:
+            command = command.split('_')[1]
+            if command == 'reset':
+                self.beat = 0
+                self.beat_to_program = 0
+                displayer.print_text("beat  reset", self.seq, self.note_length)
+            elif command == "up":
+                if self.play:
+                    displayer.print_text("pause for.  featu.re", self.seq, self.note_length)
+                else:
+                    if self.beat_to_program == self.sequence_length-1:
+                        self.beat_to_program = 0
+                    else:
+                        self.beat_to_program += 1
+                    displayer.print_text("beat:  %s" % str(self.beat_to_program+1), self.seq, self.note_length)
+            elif command == "down":
+                if self.play:
+                    displayer.print_text("pause for.  featu.re", self.seq, self.note_length)
+                else:
+                    if self.beat_to_program == 0:
+                        self.beat_to_program = 31
+                    else:
+                        self.beat_to_program -= 1
+                    displayer.print_text("beat:  %s" % str(self.beat_to_program+1), self.seq, self.note_length)
+        elif 'bpm' in command:
+            command = command.split('_')[1]
+            if command == 'up':
+                self.bpm += 2
+            elif command == "down":
+                self.bpm -= 2
+            elif command == "reset":
+                self.bpm = 120
+            self.ibb = (60.0 / self.bpm) / (self.note_length/4)
+            displayer.print_text("bpm:   %s" % self.bpm, self.seq, self.note_length)
+        elif command == "volume_up":
+            self.change_volume('+')
+        elif command == "volume_down":
+            self.change_volume('-')
+        elif command == "volume_reset":
+            self.change_volume('/')
         else:
             print('Could not find interpretation for your command. Received command: %s' % command)
-
-    def listen_for_hardware_input(self):
-        command = ""
-        # bpm change through scroll
-        # beat change through scroll
-        # button for play/pause
-        if 1:
-            command = "play"
-        # button for reset
-        if 2:
-            command = "reset"
-        # button for metro on/off
-        if 3:
-            command = "metro"
-        self.interpret_command("play")
 
     def toggle_metronome(self):
         self.metro = not self.metro
@@ -157,6 +168,22 @@ class Sequencer(object):
             self.seq[4] = numpy.zeros(shape=1, dtype='int8')
             self.seq[5] = numpy.zeros(shape=1, dtype='int8')
 
+    def change_volume(self, identifier):
+        sound_channel = self.sounds[self.current_channel]
+        new_volume = sound_channel[0].get_volume()
+        if identifier == '+':
+            new_volume += 0.05
+        elif identifier == '-':
+            new_volume -= 0.05
+        elif identifier == '/':
+            new_volume = 0.75
+        else:
+            print("ERROR - Could not find a valid identifier to change volume. Identifier: %s" % identifier)
+            return
+        for sound in sound_channel:
+            sound.set_volume(new_volume)
+        displayer.print_text("vol    set.to%s" % new_volume, self.seq, self.note_length)
+
     def listen_for_bt_input(self, queue):
         while (True):
             data = queue.get()
@@ -164,20 +191,20 @@ class Sequencer(object):
             # check for channel switching: #+ or #-
             if data[0] == "#":
                 if data[1] == "+":
-                    if channel == self.max_channels:
+                    if channel == self.max_channels-1:
                         self.current_channel = 0
                     else:
                         self.current_channel += 1
                     print("SEQ_INFO - Raised current channel.")
                 elif data[1] == "-":
                     if channel == 0:
-                        self.current_channel = self.max_channels
+                        self.current_channel = self.max_channels-1
                     else:
                         self.current_channel -= 1
                     print("SEQ_INFO - Decreased current channel.")
                 else:
                     print("ERROR - Identifier is not valid for channel switching. Received data: %s." % data)
-                displayer.print_text("switched channel to: %s" % Channels(self.current_channel).name)
+                displayer.print_text("Chann el     %s" % Channels(self.current_channel).name, self.seq, self.note_length)
 
             # identifier '%' defines setting a new sound into the sequencer
             elif data[0] == "%":
@@ -193,7 +220,7 @@ class Sequencer(object):
                     print("ERROR - Note could not be evaluated. Received data: %s." % data)
             else:
                 print("SEQ_INFO - Could not evaluate bluetooth command. Received data: %s." % data)
-            displayer.print_sequencer(self.seq, self.sequence_length)
+            displayer.print_sequencer(self.seq, seq_length=self.sequence_length, note_length=self.note_length)
 
     # method which runs the sequencer and plays sounds accordingly
     def run(self):
@@ -201,27 +228,14 @@ class Sequencer(object):
             if self.play:
                 then = time.time()
                 # if value in channel > 0, play sound
-                if self.seq[0][self.beat] != 0:
-                    self.channels[0].play(self.sounds[self.seq[0][self.beat]])
-                if self.seq[1][self.beat] != 0:
-                    self.channels[1].play(self.sounds[self.seq[0][self.beat]])
-                if self.seq[2][self.beat] != 0:
-                    self.channels[2].play(self.sounds[self.seq[0][self.beat]])
-                if self.seq[3][self.beat] != 0:
-                    self.channels[3].play(self.sounds[self.seq[0][self.beat]])
-                #if self.seq[4][self.beat] != 0:
-                #    self.channels[4].play(self.sounds[4])
-                #if self.seq[5][self.beat] != 0:
-                #    self.channels[5].play(self.sounds[5])
+                for i in range(self.max_channels):
+                    if self.seq[i][self.beat] != 0:
+                        current_sound_channel = self.sounds[i]
+                        note_to_play = self.seq[i][self.beat] - 1
+                        self.channels[i].play(current_sound_channel[note_to_play])
 
-                # 0 < beat < 31
-                if self.beat >= 31:
+                # reset beat & loop
+                if self.beat >= self.sequence_length-1:
                     self.beat = 0
                 else:
                     self.beat += 1
-                #print(self.beat)
-
-                now = time.time()
-                sleepy = float(self.ibb - (now - then))
-                if sleepy > 0.0:
-                    time.sleep(sleepy)
