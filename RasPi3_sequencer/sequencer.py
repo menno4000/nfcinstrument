@@ -223,7 +223,6 @@ class Sequencer(object):
     def run(self):
         while not self.timerThread.wait(self.ibb):
             if self.play:
-                then = time.time()
                 # if value in channel > 0, play sound
                 for i in range(self.max_channels):
                     if self.seq[i][self.beat] != 0:

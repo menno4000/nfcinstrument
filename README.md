@@ -20,7 +20,8 @@ It will show the programmed sequence and give additional information.
 
 ### Hardware-Setup
 
-General Overview of Pins on teh Raspberry Pi 3:
+General Overview of Pins on the Raspberry Pi 3:
+
 ![Pin Layout](RasPi3_sequencer/images/raspi3-pin-layout.png)
 
 For buttons and the rotary encoder use this table to connect:
@@ -73,7 +74,9 @@ sudo bluetoothctl
 First edit the script ```./start_sequencer.sh``` and change the MAC address to your HC05 value.
 Then start it to open the serial port, listen for bluetooth signals and start the sequencer:
 
-```./start_sequencer.sh```
+```
+./start_sequencer.sh
+```
 
 If you cant hear anything make sure you are using the right audiosource. With this command you can set your audio output in the Raspberry Pi:
 
