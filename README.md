@@ -1,24 +1,46 @@
-# nfc instrument
+# Near Field Groovinator
+
+Fast and easy groove creation
 
 ## Arduino racket
 We are using an Arduino NANO with the bluetooth HC05 and an NFC Shield as a racket. 
 The racket can read notes from RFID chips and send them via bluetooth to the Raspberry Pi. 
 
+You also have two buttons to switch between thh current channel which represents a tone layer (eg. Kick, Snare, HiHat).
+
 ## Raspberry Pi 3 - Sequencer, Bluetooth receiver & Displayer
-The Pi receives signals from the Arduino and starts a Sequencer. 
+The Raspberry Pi receives signals from the Arduino and starts a Sequencer. 
 It will add notes to different channels and start playing them sequentially.
+
+With some hardware knobs and buttons you can control the sequencer and record your notes.
 
 ### Displayer
 For visual support we will use an already existing LED matrix (16 x MAX7219). 
 It will show the programmed sequence and give additional information.
 
-#### Display-Setup
+### Hardware-Setup
 
-Connect your pins from the MAX7219 Matrix to the raspberry according to the following images:
+General Overview of Pins on teh Raspberry Pi 3:
+![Pin Layout](RasPi3_sequencer/images/raspi3-pin-layout.png)
+
+For buttons and the rotary encoder use this table to connect:
+
+| Rotary Encoder | Pins       | GPIO       |
+|----------------|------------|------------|
+| beat_changer   | 11, 13, 15 | 17, 27, 22 |
+| bpm_changer    | 12, 16, 18 | 18, 23, 24 |
+| volume_changer | 29, 31, 32 | 5, 6, 13   |
+| Buttons        |            |            |
+| play_button    | 36         | 16         |
+| reset_button   | 38         | 20         |
+| metro_button   | 40         | 21         |
+| preview_button |            |            |
+
+For the Displayer connect your pins from the MAX7219 Matrix to the raspberry according to the following image:
 
 ![Cable connection](RasPi3_sequencer/images/LEDMatrix_cable_connecting.png)
 
-![Pin Layout](RasPi3_sequencer/images/raspi3-pin-layout.png)
+
 
 ### Install packages on RasPi:
 ```
