@@ -1,5 +1,4 @@
 import threading
-import time
 import serial
 
 SERIAL_PORT = "/dev/rfcomm0"

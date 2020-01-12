@@ -30,9 +30,6 @@ sudo apt-get install bluetooth bluez pi-bluetooth blueman
 # install python3 and pip3
 # follow this tutorial: http://www.knight-of-pi.org/installing-python3-6-on-a-raspberry-pi/
 
-# install python modules from file
-pip3 install -r RasPi3_sequencer/requirements.txt
-
 # open spi device port
 sudo nano /boot/config.txt
 # enable code line: 'dtparam=spi=on'
@@ -51,12 +48,12 @@ sudo bluetoothctl
     exit
 ```
 
-First edit this script and change the MAC address to your HC05 value.
-Then start the script to open the serial port, listen for bluetooth signals and start the sequencer:
+First edit the script ```./start_sequencer.sh``` and change the MAC address to your HC05 value.
+Then start it to open the serial port, listen for bluetooth signals and start the sequencer:
 
-```./RasPi3_sequencer/startup_nfc_instrument.sh```
+```./start_sequencer.sh```
 
-If you cant hear anything make sure you are using the right audiosource. With this command you can set your audio output in the RasPi:
+If you cant hear anything make sure you are using the right audiosource. With this command you can set your audio output in the Raspberry Pi:
 
 ```
 # Value: 0 - auto, 1 - analoque (headphone jack), 2 - HDMI

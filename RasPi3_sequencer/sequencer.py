@@ -1,4 +1,3 @@
-import sys
 import threading
 import time
 import numpy
@@ -6,13 +5,10 @@ import pygame
 import enum
 from threading import Thread
 
-import displayer
-import util
+from .util import displayer
+from .util import layouter
 
-# methods for sequencer:
-# start/stop
-# reset sequence
-# give start presets: constant kick, kick pattern etc.
+DEFAULT_VOLUME = 0.5
 
 
 class Channels(enum.Enum):
@@ -29,9 +25,10 @@ def get_channels_and_sounds(list_of_sounds):
     amount_of_channels = len(list_of_sounds)
     amount_of_sounds = 12
 
-    pygame.mixer.init(frequency=44100, size=-16, channels=8, buffer=2 ** 12)
     pygame.init()
+    pygame.mixer.init(frequency=44100, size=-16, channels=8, buffer=2 ** 12)
     pygame.mixer.set_num_channels(amount_of_channels)
+    channels = [0] * amount_of_channels
 
     print("SEQ_INFO - Setting up '%s' channels and loading wav-files into sound objects." % amount_of_channels)
 
@@ -39,9 +36,9 @@ def get_channels_and_sounds(list_of_sounds):
         sound_channel_list = [0] * amount_of_sounds
         for j in range(amount_of_sounds):
             sound_channel_list[j] = pygame.mixer.Sound(list_of_sounds[i][j])
-            sound_channel_list[j].set_volume(0.7)
+            sound_channel_list[j].set_volume(DEFAULT_VOLUME)
         sounds.append(sound_channel_list)
-    channels = [pygame.mixer.Channel(i)] * len(sounds)
+        channels[i] = pygame.mixer.Channel(i)
 
     return channels, sounds
 
@@ -50,13 +47,13 @@ def get_sequencer(seq_length=64, amount_of_sounds=4, note_length=16):
     sequencer = numpy.zeros(shape=(amount_of_sounds, seq_length), dtype='int8')
 
     print("SEQ_INFO - Loading example Sequencer Layout")
-    sequencer[0] = util.kick_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2)
-    sequencer[1] = util.snare_or_clap_layout(seq_length=seq_length, layout=1, note_length=note_length, note=2)
-    sequencer[2] = util.hihat_layout(seq_length=seq_length, layout=1, note_length=note_length, note=8)
-    sequencer[3] = util.bass_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2, second_note=3)
+    sequencer[0] = layouter.kick_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2)
+    sequencer[1] = layouter.snare_or_clap_layout(seq_length=seq_length, layout=1, note_length=note_length, note=2)
+    sequencer[2] = layouter.hihat_layout(seq_length=seq_length, layout=1, note_length=note_length, note=8)
+    sequencer[3] = layouter.bass_layout(seq_length=seq_length, layout=2, note_length=note_length, note=2, second_note=3)
 
     if seq_length == 32:
-        util.show_sequencer_layout(sequencer)
+        displayer.show_sequencer_layout(sequencer)
     displayer.print_sequencer(sequencer, seq_length=seq_length, note_length=note_length)
     return sequencer
 
@@ -72,7 +69,7 @@ class Sequencer(object):
         self.bars = seq_length/note_length
         self.channels, self.sounds = get_channels_and_sounds(list_of_sounds)
         self.seq = get_sequencer(seq_length=self.sequence_length, amount_of_sounds=len(self.channels), note_length=self.note_length)
-        print(self.seq)
+
         self.beat = 0
         self.beat_to_program = -1
         self.current_channel = 0 # start on kick channel
@@ -129,16 +126,16 @@ class Sequencer(object):
                         self.beat_to_program = 0
                     else:
                         self.beat_to_program += 1
-                    displayer.print_text("beat:  %s" % str(self.beat_to_program+1), self.seq, self.note_length)
+                    displayer.print_text("beat:  %s" % str(self.beat_to_program + 1), self.seq, self.note_length)
             elif command == "down":
                 if self.play:
                     displayer.print_text("pause for.  featu.re", self.seq, self.note_length)
                 else:
                     if self.beat_to_program == 0:
-                        self.beat_to_program = 31
+                        self.beat_to_program = self.sequence_length-1
                     else:
                         self.beat_to_program -= 1
-                    displayer.print_text("beat:  %s" % str(self.beat_to_program+1), self.seq, self.note_length)
+                    displayer.print_text("beat:  %s" % str(self.beat_to_program + 1), self.seq, self.note_length)
         elif 'bpm' in command:
             command = command.split('_')[1]
             if command == 'up':
@@ -161,7 +158,7 @@ class Sequencer(object):
     def toggle_metronome(self):
         self.metro = not self.metro
         if self.metro:
-            metro_bar, metro_beat = util.metronome(self.sequence_length)
+            metro_bar, metro_beat = layouter.get_metronome(self.sequence_length)
             self.seq[4] = metro_bar
             self.seq[5] = metro_beat
         if not self.metro:

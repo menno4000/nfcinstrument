@@ -4,10 +4,10 @@ import os
 from queue import Queue
 
 import RPi.GPIO as GPIO
-from KY040 import KY040
+from RasPi3_sequencer.util.KY040 import KY040
 
-import receiver
-import sequencer
+from RasPi3_sequencer import receiver
+from RasPi3_sequencer import sequencer
 
 GPIO.setmode(GPIO.BCM)
 play_gpio = 16
@@ -15,50 +15,40 @@ reset_gpio = 20
 GPIO.setup(play_gpio, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(reset_gpio, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-# todo's:
-# two sequencer modes: running and paused
-# give option to enable sequencer with default values
-# insert sound from BT into sequence -> make good data format
-# create samples, create samples for whole octave
-# switch between sequence beats
-
-
-# this list contains playable sound files (please keep in order)
-# 1-kick, 2-snare (or clap), 3-hihat, 4-bass,
-sound_files = ['./sounds/Aubit_Kick5.wav', './sounds/Aubit_Snare3.wav', './sounds/Aubit_HatClosed5.wav', './sounds/Bass09.wav', './sounds/MetroBar2.wav', './sounds/MetroBeat2.wav']
+# metro sounds: MetroBeat2.wav, MetroBar2.wav
 
 
 def beat_change(direction):
     if direction == 1:
-        sequencer_loop.interpret_command("beat_up")
+        sequencer.interpret_command("beat_up")
     else:
-        sequencer_loop.interpret_command("beat_down")
+        sequencer.interpret_command("beat_down")
 
 
 def beat_reset(direction):
-    sequencer_loop.interpret_command("beat_reset")
+    sequencer.interpret_command("beat_reset")
 
 
 def bpm_change(direction):
     if direction == 1:
-        sequencer_loop.interpret_command("bpm_up")
+        sequencer.interpret_command("bpm_up")
     else:
-        sequencer_loop.interpret_command("bpm_down")
+        sequencer.interpret_command("bpm_down")
 
 
 def bpm_reset(direction):
-    sequencer_loop.interpret_command("bpm_reset")
+    sequencer.interpret_command("bpm_reset")
 
 
 def volume_change(direction):
     if direction == 1:
-        sequencer_loop.interpret_command("volume_up")
+        sequencer.interpret_command("volume_up")
     else:
-        sequencer_loop.interpret_command("volume_down")
+        sequencer.interpret_command("volume_down")
 
 
 def volume_reset(direction):
-    sequencer_loop.interpret_command("volume_reset")
+    sequencer.interpret_command("volume_reset")
 
 
 if __name__ == "__main__":
@@ -79,7 +69,7 @@ if __name__ == "__main__":
     volume_knob.start()
 
     # setup sound files
-    rootdir = "./samples/"
+    rootdir = "./RasPi3_sequencer/samples/"
     sample_files = []
     for subdir, dirs, files in os.walk(rootdir):
         for directory in sorted(dirs):
@@ -90,8 +80,8 @@ if __name__ == "__main__":
             sample_files.append(current_samples)
 
     # examples:
-    #sequencer_loop = sequencer.Sequencer(sample_files, queue, seq_length=32, note_length=16, start_sequence=True)
-    sequencer_loop = sequencer.Sequencer(sample_files, queue, seq_length=64, note_length=16, start_sequence=True)
+    #sequencer = sequencer.Sequencer(sample_files, queue, seq_length=32, note_length=16, start_sequence=True)
+    sequencer = sequencer.Sequencer(sample_files, queue, seq_length=64, note_length=16, start_sequence=True)
     while True:
         # control bluetooth input with commandline
         #print("INFO - You can type some keywords to control the sequencer via cmd.")
@@ -109,8 +99,8 @@ if __name__ == "__main__":
         play_button = GPIO.input(play_gpio)
         reset_button = GPIO.input(reset_gpio)
         if not play_button:
-            sequencer_loop.interpret_command("play")
+            sequencer.interpret_command("play")
         if not reset_button:
-            sequencer_loop.interpret_command("reset")
+            sequencer.interpret_command("reset")
         # button for metro on/off
         # button to switch between preview & record mode

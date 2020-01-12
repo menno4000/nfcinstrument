@@ -103,3 +103,17 @@ def give_info(sequencer):
     time.sleep(3)
 
     print_sequencer(sequencer.seq, seq_length=sequencer.sequence_length, note_length=sequencer.note_length)
+
+
+def show_sequencer_layout(sequencer):
+    print("SEQ_INFO - Sequencer Layout")
+    print("------------------------------------------------------------------------------------------------")
+
+    print("Bar -\t\t 1_______2_______3_______4_______5_______6_______7_______8_______")
+    print("KICK -\t\t%s ..." % sequencer[0])
+    print("SNARE -\t\t%s ..." % sequencer[1])
+    print("HIHAT -\t\t%s ..." % sequencer[2])
+    print("BASS -\t\t%s ..." % sequencer[3])
+    print("Beat - \t\t 1 2 3 4 5 6 7 8 9 10  12  14  16  18  20  22  24  26  28  30  32")
+    print("Beat - \t\t                     11  13  15  17  19  21  23  25  27  29  31")
+    print("------------------------------------------------------------------------------------------------")
