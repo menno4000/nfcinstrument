@@ -31,7 +31,7 @@ def print_sequencer(sequencer, seq_length=32, note_length=16):
                 return
 
             # display sequencer values
-            for y in range(len(sequencer)):
+            for y in range(len(sequencer) - 2):
                 for x in range(len(sequencer[y])):
                     if sequencer[y][x] != 0:
                         point = x+64, y
@@ -51,7 +51,7 @@ def print_sequencer(sequencer, seq_length=32, note_length=16):
                 return
 
             # display sequencer values
-            for y in range(len(sequencer)):
+            for y in range(len(sequencer) - 2):
                 for x in range(len(sequencer[y])):
                     if sequencer[y][x] != 0:
                         if x > 31:
@@ -61,10 +61,10 @@ def print_sequencer(sequencer, seq_length=32, note_length=16):
                         draw.point(point, fill="white")
 
 
-def print_text(message, seq, note_length):
+def print_text(message, seq, note_length, wait=1.0):
     with canvas(virtual) as draw:
         text(draw, (0, 0), message, fill="white", font=proportional(LCD_FONT))
-    time.sleep(1)
+    time.sleep(wait)
     print_sequencer(seq, seq_length=len(seq[0]), note_length=note_length)
 
 
@@ -105,7 +105,7 @@ def give_info(sequencer):
     print_sequencer(sequencer.seq, seq_length=sequencer.sequence_length, note_length=sequencer.note_length)
 
 
-def show_sequencer_layout(sequencer):
+def log_sequencer_layout(sequencer):
     print("SEQ_INFO - Sequencer Layout")
     print("------------------------------------------------------------------------------------------------")
 
@@ -116,4 +116,25 @@ def show_sequencer_layout(sequencer):
     print("BASS -\t\t%s ..." % sequencer[3])
     print("Beat - \t\t 1 2 3 4 5 6 7 8 9 10  12  14  16  18  20  22  24  26  28  30  32")
     print("Beat - \t\t                     11  13  15  17  19  21  23  25  27  29  31")
+    print("------------------------------------------------------------------------------------------------")
+
+
+def log_sequencer_infos(sequencer):
+    print("------------------------------------------------------------------------------------------------")
+    print("Sequencer infos:")
+    print()
+    print("Amount of channels: %s" % len(sequencer.channels))
+    print("Max Channels: %s" % sequencer.max_channels)
+    print("Amount of sounds: %s = %s * %s" % (len(sequencer.sounds)*len(sequencer.sounds[0]), len(sequencer.sounds), len(sequencer.sounds[0])))
+    print()
+    print("Sequence length: %s" % sequencer.sequence_length)
+    print("Note length: %s" % sequencer.note_length)
+    print("Amount of bars: %s" % sequencer.bars)
+    print("Sequencer running? %s" % sequencer.play)
+    print("Metronome on? %s" % sequencer.metro)
+    print("bpm: %s" % sequencer.bpm)
+    print("ibs: %s" % sequencer.ibs)
+    print()
+    print("current Sequencer status:")
+    print(sequencer.seq)
     print("------------------------------------------------------------------------------------------------")
