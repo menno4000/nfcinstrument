@@ -15,7 +15,7 @@
 SoftwareSerial hc_05(7, 8); // Bluetooth modul an Pins 7 und 8
 
 MFRC522 mfrc522(SS_PIN, RST_PIN); // RFID-Empfänger benennen
-MFRC522::MIFARE_Key key; // create a MIFARE_Key struct named 'key', which will hold the card information
+MFRC522::MIFARE_Key key; // MIFARE_Key struct deklarieren
 
 
 //int period = 100; //Verzoegerung zwischen Bluetooth-Signalen
@@ -37,13 +37,15 @@ void setup() // Beginn des Setups:
 
   hc_05.begin(9600);
 
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF; // MIFARE_Key struct initialisieren
 
 }
 
-int blocknr=1;  //nr of block on card we are trying to interact with
-byte blockcontent[16] = {"13____________"};//an array with 16 bytes to be written into one of the 64 card blocks is defined
+//write
+int blocknr=1;  //wir wollen den ersten block beschreiben
+byte blockcontent[16] = {"13____________"};//16 bytes enthalten den content, der auf die karte geschrieben werden soll
 
+//read
 byte readbackblock[18]; // Buffer fuer auslesen von NFC tags
 
 void loop() // Hier beginnt der Loop-Teil
@@ -97,12 +99,10 @@ void loop() // Hier beginnt der Loop-Teil
   Serial.print(note);
 
   String noteStubMessage = "%"+note;
-  
-//  mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 
   hc_05.print(noteStubMessage);
 
-  delay(500);
+  delay(500); // Verzoegerung um Mehrfacheingaben einzuschraenken
 
   Serial.println(""); // Mit dieser Zeile wird auf dem Serial Monitor nur ein Zeilenumbruch gemacht.
 
