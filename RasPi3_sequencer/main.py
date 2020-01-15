@@ -13,7 +13,7 @@ from RasPi3_sequencer import sequencer
 GPIO.setmode(GPIO.BCM)
 play_gpio = 16
 reset_gpio = 20
-record_gpio = 12
+record_gpio = 7
 metro_gpio = 21
 GPIO.setup(play_gpio, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(reset_gpio, GPIO.IN, pull_up_down=GPIO.PUD_UP)

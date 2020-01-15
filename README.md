@@ -35,7 +35,7 @@ For buttons and the rotary encoder use this table to connect:
 | play_button    | 36         | 16         |
 | reset_button   | 38         | 20         |
 | metro_button   | 40         | 21         |
-| preview_button | 32         | 12         |
+| record_button  | 26         |  7         |
 
 For the Displayer connect your pins from the MAX7219 Matrix to the raspberry according to the following image:
 
