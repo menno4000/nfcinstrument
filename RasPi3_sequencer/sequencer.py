@@ -79,7 +79,8 @@ class Sequencer(object):
                 print("SEQ_INFO - Changing to preview mode.")
                 displayer.print_text("previ ew", self.seq, self.note_length)
         elif command == "metro":
-            self.toggle_metronome()
+            self.metro = not self.metro
+            displayer.print_text("toggl e    metronome", self.seq, self.note_length)
         elif 'beat' in command:
             self.change_beat(command)
         elif 'bpm' in command:
@@ -102,16 +103,6 @@ class Sequencer(object):
             displayer.give_info(self.seq)
         else:
             print('Could not find interpretation for your command. Received command: %s' % command)
-
-    def toggle_metronome(self):
-        self.metro = not self.metro
-        if self.metro:
-            metro_bar, metro_beat = layouter.get_metronome(self.sequence_length)
-            self.seq[4] = metro_bar
-            self.seq[5] = metro_beat
-        if not self.metro:
-            self.seq[4] = numpy.zeros(shape=1, dtype='int8')
-            self.seq[5] = numpy.zeros(shape=1, dtype='int8')
 
     def change_beat(self, command):
         command = command.split('_')[1]

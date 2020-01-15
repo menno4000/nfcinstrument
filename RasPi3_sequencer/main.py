@@ -97,7 +97,7 @@ if __name__ == "__main__":
     bluetooth_input = receiver.ReceiveInput(queue)
 
     # initialize sequencer with threads: play & listen for input
-    sequencer = sequencer.Sequencer(sample_files, METRO_SAMPLES, queue, seq_length=64, note_length=16, start_sequence=True, metro=True)
+    sequencer = sequencer.Sequencer(sample_files, METRO_SAMPLES, queue, seq_length=64, note_length=16, start_sequence=True, metro=False)
 
     # listen endlessly for hardware input
     while True:
