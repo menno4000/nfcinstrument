@@ -17,8 +17,8 @@ sleep 2
 
 echo "SCRIPT_INFO - Starting sequencer script with python"
 if [ $# -eq 0 ]
-  then
-    python3 RasPi3_sequencer/main.py
-  else
-    python3 RasPi3_sequencer/main.py $1
+then
+  python3 RasPi3_sequencer/main.py
+else
+  python3 RasPi3_sequencer/main.py $1
 fi

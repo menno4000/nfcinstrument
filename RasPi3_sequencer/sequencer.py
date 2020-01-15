@@ -35,7 +35,7 @@ class Sequencer(object):
         self.cursor = 0
         self.beat_to_program = -1
         self.current_channel = 0
-        self.max_channels = len(self.channels) - 2
+        self.max_channels = len(self.channels) - 2 # ignore two metronome channels
         self.volume = 0.75
         self.record = True
 
