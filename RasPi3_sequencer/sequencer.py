@@ -80,7 +80,7 @@ class Sequencer(object):
                 displayer.print_text("previ ew", self.seq, self.note_length)
         elif command == "metro":
             self.metro = not self.metro
-            displayer.print_text("toggl e    metronome", self.seq, self.note_length)
+            displayer.print_text("toggl e      metronome", self.seq, self.note_length)
         elif 'beat' in command:
             self.change_beat(command)
         elif 'bpm' in command:
@@ -187,7 +187,7 @@ class Sequencer(object):
                 else:
                     print("SEQ_INFO - Playing sound - Channel: %s-%s" % (channel, Channels(self.current_channel).name))
                     current_sound_channel = self.sounds[channel]
-                    self.channels[channel].play(current_sound_channel[note])
+                    self.channels[channel].play(current_sound_channel[note-1])
 
             else:
                 print("SEQ_INFO - Could not evaluate bluetooth command. Received data: %s." % data)
