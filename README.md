@@ -84,3 +84,24 @@ If you cant hear anything make sure you are using the right audiosource. With th
 # Value: 0 - auto, 1 - analoque (headphone jack), 2 - HDMI
 sudo amixer cset numid=3 <value>
 ```
+
+At some point for whatever reason we could not get the audio anymore from the headphone jack. With an external USB soundcard it was still working. For that you can use these commands:
+```
+# find the name of your card:
+lsusb
+# create a configuration file and put the these values with your card number:
+sudo nano /etc/asound.conf
+	pcm.!default {
+	    type hw
+	    card 1
+	}
+	 
+	ctl.!default {
+	    type hw           
+	    card 1
+	}
+# after that reboot and try sound again:
+sudo reboot
+# you can also use the builtin mixer:
+alsamixer
+```
